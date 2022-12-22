@@ -2,6 +2,7 @@
 ![teaser](./figures/teaser.png)
 
 ## Setup
+TODO
 ### Environments
 
 ###Training
@@ -17,7 +18,7 @@ python train.py --dataroot DATASETDIR --name flashGeneration --model IntrinsicFl
 
 
 ### Evaluation
-
+TODO
 
 ##Citation
 This implementation is provided for academic use only. Please cite our paper if you use this code or any of the models.

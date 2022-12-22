@@ -4,7 +4,7 @@
 ## Setup
 TODO
 ### Environments
-
+TODO
 ###Training
 Navigate to [dataset preparation instructions](./dataset_prepare/) to download and prepare the training dataset. 
 For decomposition:

@@ -5,7 +5,7 @@
 TODO
 ### Environments
 TODO
-###Training
+### Training
 Navigate to [dataset preparation instructions](./dataset_prepare/) to download and prepare the training dataset. 
 For decomposition:
 ```sh
@@ -20,9 +20,9 @@ python train.py --dataroot DATASETDIR --name flashGeneration --model IntrinsicFl
 ### Evaluation
 TODO
 
-##Citation
+## Citation
 This implementation is provided for academic use only. Please cite our paper if you use this code or any of the models.
-##Credits
+## Credits
 The training skeleton is adaptod from the [pytorch-CycleGAN-and-pix2pix][4] repository.
 The network architecture is adopted from the [MiDaS][1] repository.
 

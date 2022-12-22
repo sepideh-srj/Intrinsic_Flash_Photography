@@ -75,6 +75,8 @@ class IntrinsicsFlashDataset(BaseDataset):
                 image_path = self.data_root + '/FAID_test' + '/{}'.format(image_name)
                 components_path = self.data_root + '/FAID_test' + '_wb_components' + '/{}'.format(
                     image_name)
+                depth_path = self.data_root + '/FAID_test' + '_depth' + '/{}'.format(
+                    image_name)
             elif 'multi_dataset_test_png' in image_path_temp:
                 multi_select = random.randint(2, 2)
                 image_path = self.data_root + '/MID_test' + '/{}'.format(
@@ -86,6 +88,9 @@ class IntrinsicsFlashDataset(BaseDataset):
                 med_alb_path = self.data_root + '/MID_test' + '_wb_components' + '/{}'.format(
                     1) + '/{}'.format(
                     image_name)
+                depth_path = self.data_root + '/MID_test' + '_depth' + '/{}'.format(
+                    multi_select) + '/{}'.format(
+                    image_name)
             elif 'DPD_test' in image_path_temp:
                 portrait_select = random.randint(1, 1)
                 image_path = self.data_root + '/DPD_test' + '/{}'.format(
@@ -94,10 +99,15 @@ class IntrinsicsFlashDataset(BaseDataset):
                 components_path = self.data_root + '/DPD_test' + '_wb_components' + '/{}'.format(
                     portrait_select) + '/{}'.format(
                     image_name)
+                depth_path = self.data_root + '/DPD_test' + '_depth' + '/{}'.format(
+                    portrait_select) + '/{}'.format(
+                    image_name)
         else:
             if 'FAID_train' in image_path_temp:
                 image_path = self.data_root + '/FAID_train' + '/{}'.format(image_name)
                 components_path = self.data_root + '/FAID_train' + '_wb_components' + '/{}'.format(
+                    image_name)
+                depth_path = self.data_root + '/FAID_train' + '_depth' + '/{}'.format(
                     image_name)
             elif 'MID_train' in image_path_temp:
                 multi_select = random.randint(1, 19)
@@ -109,6 +119,9 @@ class IntrinsicsFlashDataset(BaseDataset):
                 med_alb_path = self.data_root + '/MID_train' + '_wb_components' + '/{}'.format(
                     1) + '/{}'.format(
                     image_name)
+                depth_path = self.data_root + '/MID_train' + '_depth' + '/{}'.format(
+                    multi_select) + '/{}'.format(
+                    image_name)
             elif 'DPD_train' in image_path_temp:
                 portrait_select = random.randint(1, 20)
                 image_path = self.data_root + '/DPD_train' + '/{}'.format(
@@ -117,14 +130,16 @@ class IntrinsicsFlashDataset(BaseDataset):
                 components_path = self.data_root + '/DPD_train' + '_components' + '/{}'.format(
                     portrait_select) + '/{}'.format(
                     image_name)
-
+                depth_path = self.data_root + '/DPD_train' + '_depth' + '/{}'.format(
+                    portrait_select) + '/{}'.format(
+                    image_name)
         # Load images in rgb
         ambient = Image.open(image_path.replace(".png", "_ambient.png"))
         flash = Image.open(image_path.replace(".png", "_flash.png"))
 
         # load components
-        flashphoto_depth = Image.open(components_path.replace(".png", "depth_flash.png"))
-        ambient_depth = Image.open(components_path.replace(".png", "depth_ambient.png"))
+        flashphoto_depth = Image.open(depth_path.replace(".png", "_flash.png"))
+        ambient_depth = Image.open(depth_path.replace(".png", "_ambient.png"))
         albedo_flshpht = Image.open(components_path.replace(".png", "_flshpht_alb.png"))
         albedo_amb = Image.open(components_path.replace(".png", "_amb_alb.png"))
         normals_amb = Image.open(components_path.replace(".png", "_ambi_nrm.png"))

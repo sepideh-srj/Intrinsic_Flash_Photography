@@ -2,23 +2,42 @@
 ![teaser](./figures/teaser.png)
 
 ## Setup
-TODO
+We provide the implementation of our method for both the generation and decomposition of flash through intrinsics.
 ### Environments
-TODO
+Our model is trained using pytorch 1.7.1 and python 3.9.
+Download our models weights from [here](https://vault.sfu.ca/index.php/s/sRWFTyRkirFEw6B) and put it in the checkpoints.
+Install the following dependencies:
+```sh
+conda install pytorch torchvision opencv cudatoolkit=10.2 -c pytorch
+conda install matplotlib
+conda install scipy
+conda install scikit-image
+conda install pillow
+conda install pymatreader
+```
+
 ### Training
 Navigate to [dataset preparation instructions](./dataset_prepare/) to download and prepare the training dataset. 
 For decomposition:
 ```sh
-python train.py --dataroot DATASETDIR --name flashDecomposition --model IntrinsicFlashDecomposition  --normalize_flash 1 --normalize_ambient 1 --no_vgg_loss --no_gan_loss  
+python train.py --dataroot DATASETDIR --name flashDecomposition --model intrinsic_flash_decomposition  --normalize_flash 1 --normalize_ambient 1   
 ```
 For generation:
 ```sh
-python train.py --dataroot DATASETDIR --name flashGeneration --model IntrinsicFlashGeneration  --normalize_flash 1 --normalize_ambient 1 --no_vgg_loss --no_gan_loss  
+python train.py --dataroot DATASETDIR --name flashGeneration --model intrinsic_flash_generation  --normalize_flash 1 --normalize_ambient 1  
 ```
 
 
 ### Evaluation
-TODO
+For decomposition:
+```sh
+python test.py --dataroot DATASETDIR --name flashDecomposition --model intrinsic_flash_decomposition  --normalize_flash 1 --normalize_ambient 1 --eval 
+```
+For generation:
+```sh
+python test.py --dataroot DATASETDIR --name flashGeneration --model intrinsic_flash_generation  --normalize_flash 1 --normalize_ambient 1  --eval
+```
+
 
 ## Citation
 This implementation is provided for academic use only. Please cite our paper if you use this code or any of the models.

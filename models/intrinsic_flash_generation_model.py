@@ -10,7 +10,8 @@ from torchvision import transforms
 import cv2
 from models.altered_midas.flash_nets import DecomposeNet, GenerateNet
 from PIL import Image, ImageDraw
-
+import copy
+from .intrinsic_flash_decomposition_model import IntrinsicFlashDecompositionModel
 
 class IntrinsicFlashGenerationModel(BaseModel):
 
@@ -28,7 +29,6 @@ class IntrinsicFlashGenerationModel(BaseModel):
             parser.add_argument('--lambda_feat', type=float, default=40)
             parser.add_argument('--lambda_L1', type=float, default=100.0, help='weight for L1 loss')
             parser.add_argument('--lambda_cycle', type=float, default=50.0, help='weight for cycle loss')
-            parser.add_argument('--cycle_epoch', type=float, default=30, help='')
         return parser
 
     def __init__(self, opt):
@@ -47,15 +47,18 @@ class IntrinsicFlashGenerationModel(BaseModel):
 
         if self.isTrain and self.opt.gan_loss:
             self.model_names += ['D_Generation']
-
+        opt_decomposition = copy.deepcopy(opt)
+        opt_decomposition.isTrain = False
+        opt_decomposition.model = 'IntrinsicFlashDecomposition'
+        self.Decomposition = IntrinsicFlashDecompositionModel(opt_decomposition)
+        self.Decomposition.save_dir = 'checkpoints/'
+        self.Decomposition.load_networks('latest')
+        self.Decomposition.eval()
+        self.netG_Decomposition = self.Decomposition.netG_Decomposition
         if self.opt.no_geometry:
             self.netG_Generation = GenerateNet(input_channels=3, activation='sigmoid')
-            self.netG_Decomposition = DecomposeNet(input_channels=6, activation='sigmoid')
         else:
             self.netG_Generation = GenerateNet(input_channels=7, activation='sigmoid')
-            self.netG_Decomposition = DecomposeNet(input_channels=10, activation='sigmoid')
-
-        self.netG_Decomposition = networks.init_net(self.netG_Decomposition, gpu_ids=self.gpu_ids)
         self.netG_Generation = networks.init_net(self.netG_Generation, gpu_ids=self.gpu_ids)
         if self.isTrain and self.opt.gan_loss:
             self.netD_Generation = networks.define_D(6, opt.ndf, opt.netD,
@@ -94,7 +97,6 @@ class IntrinsicFlashGenerationModel(BaseModel):
         self.flsh_impl_shd_med = input['flsh_impl_shd_med'].to(self.device)
         self.flsh_impl_shd_amb = input['flsh_impl_shd_amb'].to(self.device)
         self.ambi_impl_shd = input['ambi_impl_shd'].to(self.device)
-        self.albedo_med = input['albedo_med'].to(self.device)
         self.ambient_shading_temp = input['ambient_shading_temp'].to(self.device)
         self.depth_flashPhoto = input['depth_flashPhoto'].to(self.device)
         self.depth_ambient = input['depth_ambient'].to(self.device)
@@ -131,6 +133,7 @@ class IntrinsicFlashGenerationModel(BaseModel):
         self.fake_ambient_dec = dec_ambi_shd_clr * self.dec_impl_alb
         self.fake_ambient_dec_wb = dec_ambi_shd * self.dec_impl_alb
         self.fake_flashphoto_dec = self.fake_ambient_dec_wb + (dec_flsh_shd * self.dec_impl_alb)
+
         # generate the predicted flash photo from the input albedo and predicted flash shd
         gen_flsh_shd = (1.0 / self.fake_flash_shading_gen) - 1.0
         self.fake_flash_gen = self.albedo_amb * gen_flsh_shd
@@ -138,16 +141,15 @@ class IntrinsicFlashGenerationModel(BaseModel):
         self.fake_flashPhoto_gen = (self.albedo_amb * gen_flsh_shd) + self.real_ambient_wb
         if not self.opt.no_cycle_loss:
             # ambient --> flash photo --> ambient
-            # -------------------------------------------------
             if self.opt.no_geometry:
                 decomposition_input_cycle = torch.cat(
                     (self.fake_flashPhoto_gen, self.albedo_flshpht), 1)
             else:
                 decomposition_input_cycle = torch.cat(
                     (self.fake_flashPhoto_gen, self.depth_flashPhoto, self.albedo_flshpht, self.normals_flshpht), 1)
+
             self.rec_flash_shading_dec, self.rec_ambient_shading_dec, self.rec_ambient_temp_dec = self.netG_Decomposition(
                 decomposition_input_cycle)
-
             # shadings computed from the generated flash photo
             rec_flsh_shd = (1.0 / self.rec_flash_shading_dec) - 1.0
             rec_ambi_shd = (1.0 / self.rec_ambient_shading_dec) - 1.0
@@ -232,7 +234,7 @@ class IntrinsicFlashGenerationModel(BaseModel):
             self.backward_D_gen()  # calculate gradients for D_A
             self.optimizer_D.step()  # update D's weights
             # update G
-            self.set_requires_grad([self.netD_Decomposition, self.netD_Generation],
+            self.set_requires_grad([self.netD_Generation],
                                    False)  # D requires no gradients when optimizing G
         self.optimizer_G.zero_grad()  # set G's gradients to zero
         self.backward_G()  # calculate graidents for G

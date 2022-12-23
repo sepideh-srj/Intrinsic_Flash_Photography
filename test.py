@@ -51,7 +51,6 @@ if __name__ == '__main__':
             color_output = colors['fake_ambient_color'].cpu()
             pred_ambi_shd[:,:,:,0] = pred_ambi_shd[:,:,:,0] * color_output[0]
             pred_ambi_shd[:,:,:,1] = pred_ambi_shd[:,:,:,1] * color_output[1]
-
             pred_ambi_shd[:,:,:,2] = pred_ambi_shd[:,:,:,2] * color_output[2]
             visuals['pred_ambi_shd_dec'] = pred_ambi_shd
 

@@ -189,7 +189,7 @@ def shading_color(lin):
     r, g, b = temp
     color_rgb = r / 255, g / 255, b / 255
     color = (lin_pixel(color_rgb[0]), lin_pixel(color_rgb[1]), lin_pixel(color_rgb[2]))
-
+    colored_lin = lin.copy()
     colored_lin[:, :, 0] = lin[:, :, 0] * color[0]
     colored_lin[:, :, 1] = lin[:, :, 1] * color[1]
     colored_lin[:, :, 2] = lin[:, :, 2] * color[2]

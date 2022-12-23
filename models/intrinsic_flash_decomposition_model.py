@@ -16,26 +16,25 @@ class IntrinsicFlashDecompositionModel(BaseModel):
     @staticmethod
     def modify_commandline_options(parser, is_train=True):
         parser.add_argument('--lambda_gradient', type=float, default=0)
-        parser.add_argument('--no_vgg_loss', action='store_true')
-        parser.add_argument('--no_gan_loss', action='store_true')
+        parser.add_argument('--vgg_loss', action='store_true')
+        parser.add_argument('--gan_loss', action='store_true')
         parser.add_argument('--no_geometry', action='store_true')
         parser.add_argument('--no_gradient_loss', action='store_true')
 
         if is_train:
-            # 100 for L1 and 25 for A and B
             parser.add_argument('--lambda_feat', type=float, default=40)
             parser.set_defaults(pool_size=0, gan_mode='wgangp')
             parser.add_argument('--lambda_L1', type=float, default=100.0, help='weight for L1 loss')
-            parser.add_argument('--lambda_colorlambda_color', type=float, default=1)
+            parser.add_argument('--lambda_color', type=float, default=1)
         return parser
 
     def __init__(self, opt):
         BaseModel.__init__(self, opt)
         self.loss_names = ['G_L1_dec', 'color']
-        if not self.opt.no_vgg_loss:
+        if self.opt.vgg_loss:
             self.loss_names += ['VGG_dec']
 
-        if not self.opt.no_gan_loss:
+        if self.opt.gan_loss:
             self.loss_names += ['D_dec', 'G_GAN_dec']
 
         visual_names_B = ['real_flashPhoto']
@@ -47,17 +46,19 @@ class IntrinsicFlashDecompositionModel(BaseModel):
 
         self.model_names = ['G_Decomposition']
 
-        if self.isTrain and not self.opt.no_gan_loss:
+        if self.isTrain and self.opt.gan_loss:
             self.model_names += ['D_Decomposition']
         if self.opt.no_geometry:
-            self.netG_Decomposition = DecomposeNet(input_channels=6, activation='sigmoid')
+            input_channels = 6
         else:
-            self.netG_Decomposition = DecomposeNet(input_channels=10, activation='sigmoid')
+            input_channels = 10
+
+        self.netG_Decomposition = DecomposeNet(input_channels= input_channels, activation='sigmoid')
 
         self.netG_Decomposition = networks.init_net(self.netG_Decomposition, gpu_ids=self.gpu_ids)
 
-        if self.isTrain and not self.opt.no_gan_loss:
-            self.netD_Decomposition = networks.define_D(opt.input_nc + opt.output_nc, opt.ndf, opt.netD,
+        if self.isTrain and self.opt.gan_loss:
+            self.netD_Decomposition = networks.define_D(6, opt.ndf, opt.netD,
                                                         opt.n_layers_D, opt.norm, opt.init_type, opt.init_gain,
                                                         self.gpu_ids)
 
@@ -67,7 +68,7 @@ class IntrinsicFlashDecompositionModel(BaseModel):
             self.criterionL1 = torch.nn.L1Loss()
             self.criterionCycle = torch.nn.L1Loss()
 
-            if not opt.no_vgg_loss:
+            if opt.vgg_loss:
                 self.criterionVGG = networks.VGGLoss(self.device)
             # initialize optimizers; schedulers will be automatically created by function <BaseModel.setup>.
             self.optimizer_G = torch.optim.Adam(
@@ -75,7 +76,7 @@ class IntrinsicFlashDecompositionModel(BaseModel):
                 betas=(opt.beta1, 0.999))
 
             self.optimizers.append(self.optimizer_G)
-            if not self.opt.no_gan_loss:
+            if self.opt.gan_loss:
                 self.optimizer_D = torch.optim.Adam(
                     itertools.chain(self.netD_Decomposition.parameters()), lr=opt.lr2,
                     betas=(opt.beta1, 0.999))
@@ -112,7 +113,7 @@ class IntrinsicFlashDecompositionModel(BaseModel):
         dec_ambi_shd = (1.0 / self.fake_ambient_shading_dec) - 1.0
 
         # color the ambient shading using the predicted ambient color temps
-        self.fake_ambient_color, dec_ambi_shd_clr = color_image(dec_ambi_shd, self.fake_ambient_temp_dec)
+        self.fake_ambient_color, dec_ambi_shd_clr = networks.color_image(dec_ambi_shd, self.fake_ambient_temp_dec, self.device)
         # compute the new implied albedo from the input image and the predicted shading
         self.dec_impl_alb = self.real_flashPhoto / (dec_flsh_shd + dec_ambi_shd_clr)
 
@@ -148,26 +149,25 @@ class IntrinsicFlashDecompositionModel(BaseModel):
 
     def backward_G(self):
         self.loss_G_GAN_dec = 0
-        if not self.opt.no_gan_loss:
+        if self.opt.gan_loss:
             fake_ambient = torch.cat((self.real_flashPhoto, self.fake_ambient_dec), 1)
             pred_fake = self.netD_Decomposition(fake_ambient)
             self.loss_G_GAN_dec = self.criterionGAN(pred_fake, True)
 
         self.loss_VGG_dec = 0
-
-        # make sure the predictions and ground-truth are [-1, 1]
-        if not self.opt.no_vgg_loss:
+        if self.opt.vgg_loss:
             self.loss_VGG_dec = self.criterionVGG(
                 self.fake_ambient_dec,
                 self.real_ambient
             ) * self.opt.lambda_feat
 
-        self.loss_G_L1_dec = l1_grad_loss(self.fake_flash_shading_dec, self.flsh_impl_shd_med,
+        self.loss_G_L1_dec = networks.l1_grad_loss(self.fake_flash_shading_dec, self.flsh_impl_shd_med,
                                           self.opt.no_gradient_loss) * self.opt.lambda_L1 + \
-                             l1_grad_loss(self.fake_ambient_shading_dec, self.ambi_impl_shd,
+                             networks.l1_grad_loss(self.fake_ambient_shading_dec, self.ambi_impl_shd,
                                           self.opt.no_gradient_loss) * self.opt.lambda_L1 + \
-                             l1_grad_loss(self.dec_impl_alb, self.albedo_med,
+                             networks.l1_grad_loss(self.dec_impl_alb, self.albedo_med,
                                           self.opt.no_gradient_loss) * self.opt.lambda_L1
+
         self.loss_color = self.criterionL1(self.ambient_shading_temp,
                                            self.fake_ambient_temp_dec.squeeze()) * self.opt.lambda_L1 * self.opt.lambda_color
         self.loss_G = (0.5 * self.loss_G_L1_dec) + \
@@ -179,7 +179,7 @@ class IntrinsicFlashDecompositionModel(BaseModel):
 
     def optimize_parameters(self, epoch):
         self.forward()  # compute fake images: G(A)
-        if not self.opt.no_gan_loss:
+        if self.opt.gan_loss:
             self.set_requires_grad([self.netD_Decomposition], True)  # enable backprop for D
             self.optimizer_D.zero_grad()  # set D's gradients to zero
             self.backward_D_dec()
@@ -188,6 +188,6 @@ class IntrinsicFlashDecompositionModel(BaseModel):
             self.set_requires_grad([self.netD_Decomposition],
                                    False)  # D requires no gradients when optimizing G
         self.optimizer_G.zero_grad()  # set G's gradients to zero
-        self.backward_G(epoch)  # calculate graidents for G
+        self.backward_G()  # calculate graidents for G
         self.optimizer_G.step()  # udpate G's weights
 

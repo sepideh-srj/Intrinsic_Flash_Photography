@@ -73,7 +73,7 @@ class IntrinsicsFlashDataset(BaseDataset):
         if self.opt.phase == 'test':
             if 'FAID_test' in image_path_temp:
                 image_path = self.data_root + '/FAID_test' + '/{}'.format(image_name)
-                components_path = self.data_root + '/FAID_test' + '_wb_components' + '/{}'.format(
+                components_path = self.data_root + '/FAID_test' + '_components' + '/{}'.format(
                     image_name)
                 depth_path = self.data_root + '/FAID_test' + '_depth' + '/{}'.format(
                     image_name)
@@ -82,10 +82,10 @@ class IntrinsicsFlashDataset(BaseDataset):
                 image_path = self.data_root + '/MID_test' + '/{}'.format(
                     multi_select) + '/{}'.format(
                     image_name)
-                components_path = self.data_root + '/MID_test' + '_wb_components' + '/{}'.format(
+                components_path = self.data_root + '/MID_test' + '_components' + '/{}'.format(
                     multi_select) + '/{}'.format(
                     image_name)
-                med_alb_path = self.data_root + '/MID_test' + '_wb_components' + '/{}'.format(
+                med_alb_path = self.data_root + '/MID_test' + '_components' + '/{}'.format(
                     1) + '/{}'.format(
                     image_name)
                 depth_path = self.data_root + '/MID_test' + '_depth' + '/{}'.format(
@@ -96,7 +96,7 @@ class IntrinsicsFlashDataset(BaseDataset):
                 image_path = self.data_root + '/DPD_test' + '/{}'.format(
                     portrait_select) + '/{}'.format(
                     image_name)
-                components_path = self.data_root + '/DPD_test' + '_wb_components' + '/{}'.format(
+                components_path = self.data_root + '/DPD_test' + '_components' + '/{}'.format(
                     portrait_select) + '/{}'.format(
                     image_name)
                 depth_path = self.data_root + '/DPD_test' + '_depth' + '/{}'.format(
@@ -105,7 +105,7 @@ class IntrinsicsFlashDataset(BaseDataset):
         else:
             if 'FAID_train' in image_path_temp:
                 image_path = self.data_root + '/FAID_train' + '/{}'.format(image_name)
-                components_path = self.data_root + '/FAID_train' + '_wb_components' + '/{}'.format(
+                components_path = self.data_root + '/FAID_train' + '_components' + '/{}'.format(
                     image_name)
                 depth_path = self.data_root + '/FAID_train' + '_depth' + '/{}'.format(
                     image_name)
@@ -113,10 +113,10 @@ class IntrinsicsFlashDataset(BaseDataset):
                 multi_select = random.randint(1, 19)
                 image_path = self.data_root + '/MID_train' + '/{}'.format(
                     multi_select) + '/{}'.format(image_name)
-                components_path = self.data_root + '/MID_train' + '_wb_components' + '/{}'.format(
+                components_path = self.data_root + '/MID_train' + '_components' + '/{}'.format(
                     multi_select) + '/{}'.format(
                     image_name)
-                med_alb_path = self.data_root + '/MID_train' + '_wb_components' + '/{}'.format(
+                med_alb_path = self.data_root + '/MID_train' + '_components' + '/{}'.format(
                     1) + '/{}'.format(
                     image_name)
                 depth_path = self.data_root + '/MID_train' + '_depth' + '/{}'.format(
@@ -198,9 +198,9 @@ class IntrinsicsFlashDataset(BaseDataset):
                 exif_path = self.exif_dir + "/" + image_name.replace(".png", "_flash.mat")
                 exif = read_mat(exif_path)
                 flash_brightness = exif['metadata']['DigitalCamera']['BrightnessValue']
-            elif "portrait" in image_path:
+            elif "DPD" in image_path:
                 flash_brightness = 5
-            elif "multi" in image_path:
+            elif "MID" in image_path:
                 flash_brightness = 9.26
         if self.opt.normalize_flash > 0:
             flash_float = flash_float * norm_flash / flash_brightness
@@ -213,8 +213,7 @@ class IntrinsicsFlashDataset(BaseDataset):
         flashPhoto_float_wb[flashPhoto_float_wb > 1] = 1
 
         # compute ambient color and color ambient
-        ambient_shading_color, ambient_colored_float, ambient_shading_temp = shading_color(
-            ambient_float.copy(), self.opt.phase, index)
+        ambient_shading_color, ambient_colored_float, ambient_shading_temp = shading_color(ambient_float.copy())
 
         # compute flashPhoto
         flashPhoto_float = flash_float + ambient_colored_float

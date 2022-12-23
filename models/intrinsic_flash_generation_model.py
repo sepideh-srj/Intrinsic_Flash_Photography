@@ -51,7 +51,7 @@ class IntrinsicFlashGenerationModel(BaseModel):
         opt_decomposition.isTrain = False
         opt_decomposition.model = 'IntrinsicFlashDecomposition'
         self.Decomposition = IntrinsicFlashDecompositionModel(opt_decomposition)
-        self.Decomposition.save_dir = 'checkpoints/'
+        self.Decomposition.save_dir = 'checkpoints/checkpoints/'
         self.Decomposition.load_networks('latest')
         self.Decomposition.eval()
         self.netG_Decomposition = self.Decomposition.netG_Decomposition

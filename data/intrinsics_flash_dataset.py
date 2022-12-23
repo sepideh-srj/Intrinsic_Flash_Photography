@@ -77,7 +77,7 @@ class IntrinsicsFlashDataset(BaseDataset):
                     image_name)
                 depth_path = self.data_root + '/FAID_test' + '_depth' + '/{}'.format(
                     image_name)
-            elif 'multi_dataset_test_png' in image_path_temp:
+            elif 'MID_test' in image_path_temp:
                 multi_select = random.randint(2, 2)
                 image_path = self.data_root + '/MID_test' + '/{}'.format(
                     multi_select) + '/{}'.format(
@@ -134,6 +134,7 @@ class IntrinsicsFlashDataset(BaseDataset):
                     portrait_select) + '/{}'.format(
                     image_name)
         # Load images in rgb
+        print(image_path_temp)
         ambient = Image.open(image_path.replace(".png", "_ambient.png"))
         flash = Image.open(image_path.replace(".png", "_flash.png"))
 

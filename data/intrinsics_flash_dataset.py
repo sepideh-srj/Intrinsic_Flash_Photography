@@ -134,7 +134,6 @@ class IntrinsicsFlashDataset(BaseDataset):
                     portrait_select) + '/{}'.format(
                     image_name)
         # Load images in rgb
-        print(image_path_temp)
         ambient = Image.open(image_path.replace(".png", "_ambient.png"))
         flash = Image.open(image_path.replace(".png", "_flash.png"))
 

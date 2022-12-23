@@ -31,48 +31,21 @@ def save_images(results_dir, phase, webpage, visuals, img_full_path, image_path,
 
     webpage.add_header(name)
     ims, txts, links = [], [], []
-    if phase == "save_results":
-        save_path_init = image_dir
-        print(img_full_path)
-        print(len(img_full_path)-1)
-        for i in range(0, len(img_full_path)-1):
-            print(img_full_path[i])
-            save_path_init = os.path.join(save_path_init, img_full_path[i])
-            if not os.path.exists(save_path_init):
-                os.makedirs(save_path_init)
-        print("save path: "+ save_path_init)
-        for label, im_data in visuals.items():
-            im = util.tensor2im(im_data)
-            name = img_full_path[-1].replace(".png", "")
-            image_name = '%s_%s.png' % (name, label)
-            # print("image name: "+ image_name)
-            # save_path = os.path.join(image_dir, img_full_path[1])
-            save_path = os.path.join(save_path_init, image_name)
-            print(save_path)
-            util.save_image(im, save_path, aspect_ratio=aspect_ratio)
-            ims.append(image_name)
-            txts.append(label)
-            links.append(image_name)
-        webpage.add_images(ims, txts, links, width=width)
-    else:
-        image_dir = webpage.get_image_dir()
-        print(image_path)
 
-        short_path = ntpath.basename(image_path[0])
-        print(short_path)
-        name = os.path.splitext(short_path)[0]
-        for label, im_data in visuals.items():
+    image_dir = webpage.get_image_dir()
 
-            im = util.tensor2im(im_data)
-            image_name = '%s_%s.png' % (name, label)
-            save_path = os.path.join(image_dir, image_name)
-            print(save_path)
-            util.save_image(im, save_path, aspect_ratio=aspect_ratio)
-            ims.append(image_name)
-            txts.append(label)
-            links.append(image_name)
-        webpage.add_images(ims, txts, links, width=width)
+    short_path = ntpath.basename(image_path[0])
+    name = os.path.splitext(short_path)[0]
+    for label, im_data in visuals.items():
 
+        im = util.tensor2im(im_data)
+        image_name = '%s_%s.png' % (name, label)
+        save_path = os.path.join(image_dir, image_name)
+        util.save_image(im, save_path, aspect_ratio=aspect_ratio)
+        ims.append(image_name)
+        txts.append(label)
+        links.append(image_name)
+    webpage.add_images(ims, txts, links, width=width)
 
 
 class Visualizer():

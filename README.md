@@ -4,16 +4,19 @@
 ## Setup
 We provide the implementation of our method for both the generation and decomposition of flash through intrinsics.
 ### Environments
-Our model is trained using pytorch 1.7.1 and python 3.9.
+Our model can be trained using python 3.9 or higher versions.
 Download our models weights from [here](https://vault.sfu.ca/index.php/s/sRWFTyRkirFEw6B) and put it in the checkpoints.
 Install the following dependencies:
 ```sh
-conda install pytorch torchvision opencv cudatoolkit=10.2 -c pytorch
+conda install pytorch torchvision pytorch-cuda=11.6 -c pytorch -c nvidia
 conda install matplotlib
 conda install scipy
 conda install scikit-image
-conda install pillow
-conda install pymatreader
+conda install -c conda-forge pymatreader
+conda install -c conda-forge dominate
+conda install -c conda-forge timm
+pip install opencv-python
+
 ```
 
 ### Training

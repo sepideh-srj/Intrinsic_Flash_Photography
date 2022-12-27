@@ -7,5 +7,7 @@ Download all the illuminations from the main dataset and extract them into a sin
 
 Download and extract the exif files.
 
-Map the illuminations to XYZ color space by getXYZ.m function with the color matrix available in exif data of the PNG files. 
+Use the (IluminationsToXYZ.m) script to map the illuminations to XYZ color space with the color matrix available in exif data of the PNG files. 
+
+Use the (FAID.py) script to convert the illuminations to linear RGB and white balance them. 
  

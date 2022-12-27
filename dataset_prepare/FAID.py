@@ -1,10 +1,6 @@
-from shutil import copyfile
 import os
 from PIL import Image
 import numpy as np
-import matplotlib.pyplot as plt
-import cv2
-import skimage
 from PIL.PngImagePlugin import PngImageFile, PngInfo
 from util import whiteBalance, changeTemp, xyztorgb, divideImagePair
 
@@ -25,26 +21,21 @@ for index, image in enumerate(images):
         flash = changeTemp(flash, 48)
         ambient = changeTemp(ambient, 48)
 
-    flashPhoto = flash + ambient
-    flashPhoto[flashPhoto < 0] = 0
-    flashPhoto[flashPhoto > 1] = 1
-
-    flashPhoto = xyztorgb(flashPhoto, hyper_des)
     ambient = xyztorgb(ambient, hyper_des)
     flash = xyztorgb(flash, hyper_des)
 
     # white balance
     ambient_wb, flashPhoto_wb = whiteBalance(flash, ambient)
 
-    flashPhoto = Image.fromarray((flashPhoto_wb * 255).astype('uint8'))
-    ambient = Image.fromarray((ambient_wb * 255).astype('uint8'))
+    flashPhoto_wb = Image.fromarray((flashPhoto_wb * 255).astype('uint8'))
+    ambient_wb = Image.fromarray((ambient_wb * 255).astype('uint8'))
     flash = Image.fromarray((flash * 255).astype('uint8'))
 
     name_ambient = os.path.join(resultDir, image.replace(".png", "_ambient.png"))
     name_flash = os.path.join(resultDir, image.replace(".png", "_flash.png"))
     name_flashPhoto = os.path.join(resultDir, image.replace(".png", "_flashPhoto.png"))
 
-    ambient.save(name_ambient)
+    ambient_wb.save(name_ambient)
     flash.save(name_flash)
-    flashPhoto.save(name_flashPhoto)
+    flashPhoto_wb.save(name_flashPhoto)
 

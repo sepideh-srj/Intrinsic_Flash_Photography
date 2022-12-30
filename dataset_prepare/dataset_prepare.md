@@ -17,3 +17,19 @@ Download the multi illumination dataset through the link.
  
 
 Use the (MID.py) script to convert the illuminations to linear RGB and white balance them and put the different ambient illuminations for each scene in different sub-folders.
+
+## DeepFlash Portrait Dataset
+
+Please contact the authors to get access to the preprocessed dataset. The preprocessing has an affine aligement between flash and no-flash photos. 
+
+We utilize flash photographs in 'inputs_origin' and no-flash photographs in 'target' folders.
+
+Each portrait is rotated from 10 different angles, we only select one of the angles for each photoghraph.
+
+We segment and generate the alpha mattings for the flash and no-flash pairs. Download The alpha mats [here](https://vault.sfu.ca/index.php/s/wdRHtP6qqXQ5gOn). 
+
+We select photographs from the FAID that are suitable to use as background images. Download them [here]().
+
+Utilize the (DPD.py) script to blend the portraits with background images nad white balance them.  
+
+

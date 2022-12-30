@@ -3,6 +3,32 @@ import numpy as np
 from PIL.PngImagePlugin import PngImageFile, PngInfo
 
 
+def getAverage(image):
+    dropOut = int(np.floor(len(image) / 4))
+    image = np.sort(image)
+    image = np.delete(image, range(0, dropOut))
+    image = np.delete(image, range((len(image) - dropOut), len(image)))
+    avg_image = np.average(image)
+    return avg_image
+
+
+def alphaBlend(person, room, alpha):
+    alpha = np.array(alpha)
+    alpha = np.reshape(alpha, [512, 512, 1])
+    alpha = np.tile(alpha, [1, 1, 3])
+    alpha = alpha.astype(float) / 255
+
+    person = np.array(person) / 255
+    room = np.array(room) / 255
+
+    foreground = person.astype(float)
+    background = room.astype(float)
+    foreground = cv2.multiply(alpha, foreground)
+    background = cv2.multiply(1.0 - alpha, background)
+    outImage = cv2.add(foreground, background)
+    return outImage
+
+
 def whiteBalance(flash_lin, ambient_lin):
     flash_gray = color.rgb2gray(flash_lin)
     flash_normalize_gray = flash_lin.copy()

@@ -16,7 +16,7 @@ Use the [FAID](./FAID.py/) script to convert the illuminations to linear RGB and
 Download the multi illumination dataset through the link. 
  
 
-Use the [MID](./MID.py/) script to convert the illuminations to linear RGB and white balance them and put the different ambient illuminations for each scene in different sub-folders.
+Use the [MID](./MID.py/) script to convert the illuminations to linear RGB, white balance them and put the different ambient illuminations for each scene in different sub-folders.
 
 ## DeepFlash Portrait Dataset
 
@@ -30,6 +30,6 @@ We segment and generate the alpha mattings for the flash and no-flash pairs. Dow
 
 We select photographs from the FAID that are suitable to use as background images. Download them [here](https://vault.sfu.ca/index.php/s/U8Hm9Q83A45ZQ0g).
 
-Utilize the [DPD](./DPD.py/) script to blend the portraits with background images nad white balance them.  
+Utilize the [DPD](./DPD.py/) script to blend the portraits with background images, white balance them and save the linear RGB images in sub-folders based on the number of different backgrounds chosen for each portrait.  
 
 

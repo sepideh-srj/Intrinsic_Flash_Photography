@@ -1,5 +1,7 @@
 # Computational Flash Photography through Intrinsics
 ![teaser](./figures/teaser.png)
+We develop a system to computationally control the flash light in photographs originally taken with or without flash. We formulate the flash photograph formation through image intrinsics, and estimate the flash shading through generation for no-flash photographs (top) or decomposition where we separate the flash from the ambient illumination for flash photographs (bottom).
+Paper Link: https://arxiv.org/abs/2306.06089
 
 ## Setup
 We provide the implementation of our method for both the generation and decomposition of flash through intrinsics.
